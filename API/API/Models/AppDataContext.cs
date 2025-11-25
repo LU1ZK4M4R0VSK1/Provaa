@@ -2,19 +2,16 @@
 
 namespace API.Models;
 
+// Contexto de dados da aplicação, responsável pela comunicação com o banco de dados.
+// Criado por Luiz Kamarovski
 public class AppDataContext : DbContext
 {
+    // DbSet para a entidade Chamado, permitindo operações de CRUD na tabela de chamados.
     public DbSet<Chamado> Chamados { get; set; }
 
+    // Configura o provedor de banco de dados a ser utilizado (SQLite).
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlite("Data Source=LuizKamarovski_Chamados.db");
-    }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Chamado>().HasData(
-            new Chamado { ChamadoId = "f4a2b8d9-7c4e-4f8e-bdc9-9181e456ad0e", Descricao = "TESTE", CriadoEm = DateTime.Now, Status = "Aberto" }
-        );
     }
 }

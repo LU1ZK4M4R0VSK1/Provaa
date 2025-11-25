@@ -15,52 +15,75 @@ var app = builder.Build();
 
 app.MapGet("/", () => "LuizKamarovski");
 
-//ENDPOINTS DE TAREFA
+// Criado por Luiz Kamarovski
 //GET: http://localhost:5273/api/chamado/listar
+// Retorna uma lista de todos os chamados cadastrados.
 app.MapGet("/api/chamado/listar", ([FromServices] AppDataContext ctx) =>
 {
     if (ctx.Chamados.Any())
     {
         return Results.Ok(ctx.Chamados.ToList());
     }
-    return Results.NotFound();
+    return Results.NotFound("Nenhum chamado encontrado.");
 });
 
+// Criado por Luiz Kamarovski
 //POST: http://localhost:5273/api/chamado/cadastrar
+// Cadastra um novo chamado no sistema.
 app.MapPost("/api/chamado/cadastrar", ([FromServices] AppDataContext ctx, [FromBody] Chamado chamado) =>
 {
-    chamado.Status = "Aberto";
+    chamado.status = "Aberto";
     ctx.Chamados.Add(chamado);
     ctx.SaveChanges();
     return Results.Created("", chamado);
 });
 
-//PUT: http://localhost:5273/chamado/alterar/{id}
-app.MapPut("/api/chamado/alterar/{id}", ([FromServices] AppDataContext ctx, [FromRoute] string id) =>
+// Criado por Luiz Kamarovski
+//PATCH: http://localhost:5273/api/chamado/alterar
+// Altera o status de um chamado. A transição de status é: Aberto -> Em atendimento -> Resolvido.
+app.MapPatch("/api/chamado/alterar", ([FromServices] AppDataContext ctx, [FromBody] Chamado chamadoAlterado) =>
 {
-    var chamado = ctx.Chamados.Find(id);
-    if (chamado is null) return Results.NotFound();
+    var chamado = ctx.Chamados.Find(chamadoAlterado.id);
+    if (chamado is null) return Results.NotFound("Chamado não encontrado.");
 
-    if (chamado.Status == "Aberto") chamado.Status = "Em atendimento";
-    else if (chamado.Status == "Em atendimento") chamado.Status = "Resolvido";
+    if (chamado.status == "Aberto")
+    {
+        chamado.status = "Em atendimento";
+    }
+    else if (chamado.status == "Em atendimento")
+    {
+        chamado.status = "Resolvido";
+    }
 
     ctx.Chamados.Update(chamado);
     ctx.SaveChanges();
     return Results.Ok(chamado);
 });
 
-//GET: http://localhost:5273/chamado/naoconcluidas
-app.MapGet("/api/chamado/naoresolvidos", ([FromServices] AppDataContext ctx) =>
+// Criado por Luiz Kamarovski
+//GET: http://localhost:5273/api/chamado/naoresolvido
+// Retorna uma lista de chamados que não foram resolvidos (status "Aberto" ou "Em atendimento").
+app.MapGet("/api/chamado/naoresolvido", ([FromServices] AppDataContext ctx) =>
 {
-    //Implementar a listagem dos chamados não resolvidos
-    return Results.Ok(ctx.Chamados.Where(x => x.Status != "Resolvido").ToList());
+    var naoResolvidos = ctx.Chamados.Where(x => x.status == "Aberto" || x.status == "Em atendimento").ToList();
+    if (naoResolvidos.Any())
+    {
+        return Results.Ok(naoResolvidos);
+    }
+    return Results.NotFound("Nenhum chamado não resolvido encontrado.");
 });
 
-//GET: http://localhost:5273/chamado/concluidas
+// Criado por Luiz Kamarovski
+//GET: http://localhost:5273/api/chamado/resolvidos
+// Retorna uma lista de todos os chamados que já foram resolvidos.
 app.MapGet("/api/chamado/resolvidos", ([FromServices] AppDataContext ctx) =>
 {
-    //Implementar a listagem dos chamados resolvidos
-    return Results.Ok(ctx.Chamados.Where(x => x.Status == "Resolvido").ToList());
+    var resolvidos = ctx.Chamados.Where(x => x.status == "Resolvido").ToList();
+    if (resolvidos.Any())
+    {
+        return Results.Ok(resolvidos);
+    }
+    return Results.NotFound("Nenhum chamado resolvido encontrado.");
 });
 
 app.UseCors("AcessoTotal");
