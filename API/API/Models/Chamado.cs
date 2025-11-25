@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace API.Models;
 
@@ -8,6 +9,7 @@ public class Chamado
 {
     // Identificador único do chamado
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int id { get; set; }
 
     // Descrição detalhada do problema ou solicitação

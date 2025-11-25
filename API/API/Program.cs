@@ -13,10 +13,11 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.MapGet("/", () => "LuizKamarovski");
+app.UseCors("AcessoTotal");
 
-// Criado por Luiz Kamarovski
-//GET: http://localhost:5273/api/chamado/listar
+app.Run();
+
+public record ChamadoDto(string descricao);
 // Retorna uma lista de todos os chamados cadastrados.
 app.MapGet("/api/chamado/listar", ([FromServices] AppDataContext ctx) =>
 {
@@ -30,9 +31,9 @@ app.MapGet("/api/chamado/listar", ([FromServices] AppDataContext ctx) =>
 // Criado por Luiz Kamarovski
 //POST: http://localhost:5273/api/chamado/cadastrar
 // Cadastra um novo chamado no sistema.
-app.MapPost("/api/chamado/cadastrar", ([FromServices] AppDataContext ctx, [FromBody] Chamado chamado) =>
+app.MapPost("/api/chamado/cadastrar", ([FromServices] AppDataContext ctx, [FromBody] ChamadoDto novoChamado) =>
 {
-    chamado.status = "Aberto";
+    var chamado = new Chamado { descricao = novoChamado.descricao };
     ctx.Chamados.Add(chamado);
     ctx.SaveChanges();
     return Results.Created("", chamado);
